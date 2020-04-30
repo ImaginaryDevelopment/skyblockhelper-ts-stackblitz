@@ -47,14 +47,15 @@ let getATitle = (x:ArmorSet) => typeof x == 'string' ? x : x.name;
 let getPartTitle = (x:NamedPart|ArmorPart) => typeof x == 'string' ? x : x.name;
 let getPartType = (x:NamedPart|ArmorPart) => typeof x =='string'? x : x.part;
 let getParts = (a:ArmorSet) => typeof a == 'string'? allParts: a.parts;
-let displayChecks = (a:ArmorSet, checkedParts:ArmorPart[]) => (<ul className='is-horizontal list'>
-  {getParts(a).map(p => (<li key={getPartTitle(p)} className='list-item' title={getPartTitle(p)}><input className='checkbox' type='checkbox'
-   checked={checkedParts.includes(getPartType(p))} />{getPartType(p)}</li>))}
+let DisplayChecks = (props:{a:ArmorSet, checkedParts:ArmorPart[], onChange:Types.Action1<ArmorPart>}) => (<ul className='is-horizontal list'>
+  {getParts(props.a).map(p => (<li key={getPartTitle(p)} className='list-item' title={getPartTitle(p)}><input className='checkbox' type='checkbox'
+   checked={props.checkedParts.includes(getPartType(p))} onChange={() => props.onChange(getPartType(p))} />{getPartType(p)}</li>))}
 </ul>);
 
 type ArmorDisplayProps = {
   folded:boolean
   onToggle:Types.Action
+  onChange:Types.Action2<string,ArmorPart>
   armor:ArmorSet
   checkedParts:ArmorPart[]
 }
@@ -67,40 +68,56 @@ let ArmorDisplay = (props:ArmorDisplayProps) => {
   <div className='columns'>
     <div className='column'>
   <FoldMaster title={title} isFolded={props.folded} onToggle={props.onToggle} />
-  </div><FoldTarget isFolded={props.folded}><div className='column is-a-fifth'>{displayChecks(props.armor, props.checkedParts)}</div></FoldTarget>
+  </div><FoldTarget isFolded={props.folded}><div className='column is-a-fifth'><DisplayChecks a={ props.armor } checkedParts= { props.checkedParts }
+      onChange= { ap => props.onChange(getATitle(props.armor),ap) } /></div></FoldTarget>
   </div>
 </li>);
 
-}
-
-type ArmorComponentState = {
-  folded:string[]
-
-}
-type ArmorComponentProps = {
-  getStorage:<T>(key:string) => StorageAccess<T>
 }
 
 type IStringDict<T> = {
   [name:string]: (T | undefined)
 }
 
+type ArmorComponentState = {
+  folded:string[]
+  checked:IStringDict<ArmorPart[]>
+}
+
+type ArmorComponentProps = {
+  getStorage:<T>(key:string) => StorageAccess<T>
+}
+
+
 const render = (store:Types.Action1<ArmorComponentState>): ComRenderer <ArmorComponentProps,ArmorComponentState>  => (props,state,dispatch) => {
   console.log('rendering armor!');
-  let onToggle = (a: ArmorSet) =>{
-    let next = copyUpdate(state,'folded',toggleArrayValue(state.folded,getATitle(a)));
+  let update = (next:ArmorComponentState) =>
+  {
     store(next);
     dispatch(next);
+  }
+  let onToggle = (a: ArmorSet) =>{
+    let next = copyUpdate(state,'folded',toggleArrayValue(state.folded,getATitle(a)));
+    update(next);
   };
+  let onChange = (name:string,part:ArmorPart) =>{
+    let next = copyUpdate(state,'checked',copyUpdate(state.checked,name,toggleArrayValue(state.checked[name]||[],part)));
+    console.log('Armor.onChange',next);
+    update(next);
+  }
 
   return (<div>Armor
-      {armorSets.map(a => <ArmorDisplay key={getATitle(a)} armor={a} checkedParts={[]}
-        folded={state.folded.includes(getATitle(a))} onToggle={() => onToggle(a)} />)}
+      {armorSets.map(a => <ArmorDisplay key={getATitle(a)} armor={a} checkedParts={state.checked[getATitle(a)] || []}
+        folded={state.folded.includes(getATitle(a))}
+        onToggle={() => onToggle(a)}
+        onChange={onChange}
+        
+        />)}
   </div>)
 };
 
 export const ArmorComponent = (props:ArmorComponentProps) =>{
   const armorStorage = props.getStorage<ArmorComponentState>('ArmorComponent');
-  const [state,setState] = React.useState(() => armorStorage.readIt({folded:[]}));
+  const [state,setState] = React.useState(() => armorStorage.readIt({folded:[],checked:{}}));
   return render(armorStorage.storeIt)(props,state,setState);
 }
