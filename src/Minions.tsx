@@ -1,14 +1,23 @@
 import React from 'react';
+
+import * as Types from './Types';
+
 import {copyUpdate,getTargetInfo,getTargetValue,toggleArrayValue,formatNumber} from './Shared'
 import {HField,StatefulProps,NumberInput,Diagnostic} from './SharedComponents'
 
-let ItemSelector = ({items,targetItemName,targetItemCost,onSelected}) =>(
+type TargetItem = {
+  name:string
+  resource:string
+  resourceAmount:number
+}
+
+let ItemSelector = (props:{items:TargetItem[],selectedItem: undefined | {name:string ,resourceAmount:number},onSelected:Types.Action1<string>}) =>(
   <div className='select'>
-    <select className='select' onChange={onSelected}>
+    <select className='select' onChange={getTargetValue('ItemSelector',props.onSelected)}>
       <option value=''>Items</option>
       {
-        items.map(item =>
-          <option value={item.name} selected={targetItemName == item.name && targetItemCost == item.resourceAmount} > {item.name} </option>
+        items.map((item: TargetItem) =>
+          <option value={item.name} selected={props.selectedItem && (props.selectedItem.name == item.name && props.selectedItem.resourceAmount == item.resourceAmount)} > {item.name} </option>
         )
       }
     </select>
@@ -17,12 +26,8 @@ let ItemSelector = ({items,targetItemName,targetItemCost,onSelected}) =>(
 let minions = [
 
 ]
-type TargetItem = {
-  name:string
-  resource:string
-}
 
-let item = (name,resource,resourceAmount) => (
+let item = (name: string,resource: string,resourceAmount: number) => (
   {name,resource,resourceAmount});
 let items : TargetItem[] = [
   item('Runaan\'s Bow(s)','String',36864),
@@ -39,7 +44,7 @@ let initState = {
   selectedItem:items[2],
   itemCost:245760
 };
-let FuelColumn = props =>{
+let FuelColumn = (props: { unfueledCoins: React.Key; multiplier: number; durationHr: React.Key; asterisk: any; name: React.ReactNode; }) =>{
   let fuelCoinOverage = +props.unfueledCoins * +props.multiplier - +props.unfueledCoins;
   // let perMinionFuelProfitPerHr = fuelProfitFullPerHr / props.minionCount;
   let breakeven = +fuelCoinOverage * +props.durationHr;
@@ -50,7 +55,7 @@ let FuelColumn = props =>{
       </div>);
 };
 
-let FuelAnalysis = props =>{
+let FuelAnalysis = (props: { productionPerHr: number; minionBazaarPlain: number; }) =>{
   let unfueledCoins = props.productionPerHr * props.minionBazaarPlain;
   let fuels = [
     {name:"Coal",multiplier:1.05, durationHr:0.5},
@@ -75,20 +80,19 @@ let FuelAnalysis = props =>{
       {
         fuels.map(fuel =>(
           <FuelColumn name={fuel.name} unfueledCoins={unfueledCoins} durationHr={fuel.durationHr} multiplier={fuel.multiplier} 
-          asterisk={fuel.asterisk} />
+          asterisk={(fuel as any).asterisk} />
         ))
       }
       
     </div>);
 };
 export type MinionTabState = {
-  minionDelay:number
-  minionCount:number
-  minionProduction:number
-  plainvalue:number
-  resourceAmount:number
-  selectedItem:any
-  
+  minionDelay: number
+  minionCount: number
+  minionProduction: number
+  plainvalue: number
+  resourceAmount: number
+  selectedItem: TargetItem | undefined
 }
 
 // <HField input={delay} label='Delay' />
@@ -106,14 +110,15 @@ export const initMinionTabState : MinionTabState = {
 }
 
 export let MinionTab = (props:StatefulProps<MinionTabState>) => {
+
   if(props == null || props.state.minionDelay == null) {
     return (<div>Bad minionTab input: {JSON.stringify(props && props.state? props.state:props,undefined,4)}</div>);
   }
+
   let setState = <TProp extends keyof MinionTabState>(name:TProp) => (value:MinionTabState[TProp]) => props.onStateChange(copyUpdate(props.state,name,value));
-  type Value<T> = {value:T};
   let setValueState = <TProp extends keyof MinionTabState>
     (name:TProp) => 
-    (nv) =>
+    (nv: { value: MinionTabState[TProp]; }) =>
     props.onStateChange(copyUpdate(props.state,name,nv.value));
   // let delay = (<NumberInput name='minionDelay' value={props.state.minionDelay} onChange={getTargetValue('minionDelay', setState('minionDelay'))} />);
   // let count = (<NumberInput name='minionCount' value={props.state.minionCount} onChange={getTargetValue('minionCount')} />);
@@ -131,23 +136,23 @@ export let MinionTab = (props:StatefulProps<MinionTabState>) => {
       {name:'plainvalue', label:'Est. Value', title:'How much do you think 1 unit would sell for?'},
       {name:'minionCount', label:'Minion Count', title:'How many of this minion at this tier do you have?'},
   ];
-  let updateSelectedItem = getTargetValue('itemSelector', x => setState('selectedItem')(items.find(item => item.name == x)));
+
+  let updateSelectedItem = (x:string) => setState('selectedItem')(items.find(item => item.name == x));
+
   return (
     <div>
       <div className='bd-callout'>
-        {fields.map(item =>(
-          <HField label={item.label} input={<NumberInput name={item.name} value={props.state[item.name]} onChange={setValueState(item.name)} />} title={item.title} />
+        {fields.filter(item => item.name !== 'selectedItem').map(item =>(
+          <HField label={item.label} input={<NumberInput name={item.name} value={props.state[item.name] as any} onChange={setValueState(item.name) as any} />} title={item.title} />
         ))}
       </div>
       <FuelAnalysis productionPerHr={productionPerHrPerMinion} minionBazaarPlain={props.state.plainvalue} />
       <hr />
       <div className="column">
           <ItemSelector
-              items={items} 
-              targetItemName={props.state.selectedItem.name} 
-              targetItemCost={props.state.selectedItem.resourceAmount} 
+              items={items}
+              selectedItem={props.state.selectedItem}
               onSelected={updateSelectedItem}
-              append={props.state.selectedItem.resource}
           />
           <span className="span">
             {props.state.selectedItem.resource}

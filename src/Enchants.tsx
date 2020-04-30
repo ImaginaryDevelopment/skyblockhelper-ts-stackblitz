@@ -1,6 +1,7 @@
 import React from 'react';
 import {copyUpdate,getTargetInfo,toggleArrayValue} from './Shared'
 import {TabContainer,TabTextLink} from './SharedComponents'
+import * as Types from './Types'
 
 declare global {
     interface Array<T> {
@@ -108,7 +109,7 @@ type EnchantRowProps = {
   e:Enchant
   struck:string[]
   colorRecommendations:boolean
-  onEnchantClick:Action1<string>
+  onEnchantClick:Types.Action1<string>
 }
 let EnchantRow = (props:EnchantRowProps) => {
   let color = props.colorRecommendations && props.e.isRecommended;
@@ -129,8 +130,8 @@ type EnchantTableProps = {
   enchants: Enchant[][]
   struck:string[]
   colorRecommendations?: boolean
-  onEnchantClick: Action1<string>
-  onEnchantClear: Action
+  onEnchantClick: Types.Action1<string>
+  onEnchantClear: Types.Action
 }
 
 let EnchantTable = (props:EnchantTableProps) =>(
@@ -161,14 +162,15 @@ let EnchantTable = (props:EnchantTableProps) =>(
 );
 
 type EnchantsProps = {
-  onEnchantClick: Action1<string>
-  onEnchantClear: Action
+  onEnchantClick: Types.Action1<string>
+  onEnchantClear: Types.Action
   struck:string[]
+  colorRecommendations:boolean
 }
 
 interface SwordEnchantsProps extends EnchantsProps {
   colorRecommendations:boolean,
-  toggleColors:ActionAny
+  toggleColors:Types.ActionAny
 }
 
 let SwordEnchants = (props:SwordEnchantsProps) =>(
@@ -228,7 +230,7 @@ export const enchantsMenuInit : Readonly<EnchantsMenuState> = {
 //     struck: createLens<EnchantsMenuState,'struck'>('struck'),
 //     state: createLens<EnchantsMenuProps,'state'>('state')
 // }
-export type StateHandler = ComponentEventHandler<EnchantsMenuState>;
+export type StateHandler = Types.ComponentEventHandler<EnchantsMenuState>;
 
 type EnchantsMenuProps = {
   state:EnchantsMenuState,
