@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./",
+        "noImplicitAny": true,
+        "jsx": "react",
+        "esModuleInterop": true,
+        "lib": ["es6","dom"]
+    },
+    "exclude":["node_modules"]
+}
