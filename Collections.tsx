@@ -1,5 +1,5 @@
 import React from 'react';
-import {ArmorComponent} from './Collections/Armors'
+import {ArmorComponent} from './collections/Armors'
 import { StorageAccess } from './Shared';
 
 
