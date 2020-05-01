@@ -85,7 +85,7 @@ export let TabContainer = <T extends string>(props:TabContainerProps<T>) => (
   <div className={'tabs is-centered is-boxed ' + (props.addedClasses || '')}>
     <ul>
       {
-        props.stdTabs == null ? '' : (props.stdTabs.names.map(n => (<TabTextLink name={n} active={props.stdTabs.active} onClick={props.stdTabs.onClick} />)))
+        props.stdTabs == null ? '' : (props.stdTabs.names.map(n => (<TabTextLink key={n} name={n} active={props.stdTabs.active} onClick={props.stdTabs.onClick} />)))
       }
     {props.children}
     </ul>

@@ -88,6 +88,24 @@ let FoldyListItem = (props:{name:string,title:string,folded:boolean,onToggle:Typ
       </FoldTarget>
   </div>
 </li>);
+let DisplayWeapon = (props:{item:Weapon, checked:string[],onChange: Types.Action1<string>}) => (
+    <li key={props.item.name} className='list-item' title={props.item.name}>
+      <div className="columns">
+          <div className="column">
+            <input  className='checkbox' type='checkbox'
+                    checked={props.checked.includes(props.item.name)}
+                    onChange={() => props.onChange(props.item.name)} />
+            {props.item.name}
+            </div>
+            </div>
+            </li>
+);
+
+let DisplayChecks = (props:{items:Weapon[],checked:string[], onChange:Types.Action1<string>}) => (
+    <ul className='is-horizontal list'>
+    {props.items.map(p => (<DisplayWeapon item={p} checked={props.checked} onChange={props.onChange} />)) }
+
+</ul>);
 
 export const WeaponComponent = (props:WeaponComponentProps) =>{
   const weaponStorage = props.getStorage<WeaponComponentState>('WeaponComponent');
@@ -107,16 +125,29 @@ export const WeaponComponent = (props:WeaponComponentProps) =>{
   let tab = state.subtab == 'Sword' ?
     <div>
         <ul>
-            {Rarities.all.map(r => <FoldyListItem name={r} title={r} onToggle={() => onToggle('swordFolded')(r)} folded={(state.swordFolded as Types.Rarity[]).includes(r)} >
-
+            {Rarities.all.map(r => <FoldyListItem key={r}
+                name={r} title={r} onToggle={() => onToggle('swordFolded')(r)}
+                folded={(state.swordFolded as Types.Rarity[]).includes(r)} >
+                    <DisplayChecks checked={state.swordChecked} onChange={onChange('swordChecked')} items={swords.filter(w => w.rarity == r)} />
             </FoldyListItem>)}
         </ul>
     </div> : 
+    state.subtab == 'Bow'?
+    <div>
+        <ul>
+            {Rarities.all.filter(r => bows.map(b => b.rarity).includes(r)).map(r => <FoldyListItem key={r}
+                name={r} title={r} onToggle={() => onToggle('bowFolded')(r)}
+                folded={(state.bowFolded as Types.Rarity[]).includes(r)} >
+                    <DisplayChecks checked={state.bowChecked} onChange={onChange('bowChecked')} items={bows.filter(w => w.rarity == r)} />
+            </FoldyListItem>)}
+        </ul>
+        </div>
+                :
     <div>Unmapped tab {state.subtab}</div>;
-  return (props:WeaponComponentProps) => (<div>
+  return (<div>
           <TabContainer stdTabs={{names:['Sword','Bow'],onClick:tabChange, active:state.subtab}}>
-              {tab}
           </TabContainer>
+              {tab}
 
       </div>);
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import {ArmorComponent} from './collections/Armors'
 import { StorageAccess, copyUpdate } from './Shared';
 import { TabContainer } from './SharedComponents';
+import { WeaponComponent } from './collections/Weapons';
 
 
 type CollectionComponentState = {
@@ -14,6 +15,7 @@ let getTab = (subtab:CollectionComponentState['subtab'],props:CollectionComponen
   let getStorage = <T,>(key:string) => props.getStorage<T>('CollectionComponent.' + key);
   switch(subtab){
     case 'Armor': return (<ArmorComponent getStorage={getStorage} />);
+    case 'Weapons': return(<WeaponComponent getStorage={getStorage} />);
   }
 }
 export const CollectionComponent = (props:CollectionComponentProps) => {
