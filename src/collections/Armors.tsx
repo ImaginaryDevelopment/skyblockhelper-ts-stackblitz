@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import * as Types from '../Types';
-import { createStorageAccess,isValueString,StorageAccess, toggleArrayValue, copyUpdate} from '../Shared';
-import {FoldMaster,FoldTarget,createStoredComponent,ComRenderer} from '../SharedComponents';
+import { StorageAccess, toggleArrayValue, copyUpdate} from '../Shared';
+import {FoldMaster,FoldTarget,ComRenderer} from '../SharedComponents';
 // track armor collections
 // needs local storage
 
@@ -17,6 +17,7 @@ let namedPart  = (name:string,part:ArmorPart) : NamedPart => ({name:name,part:pa
 let partedSet = (helm: string,chest: string,leg: string,boots: string) : NamedPart[] =>
   [namedPart(helm,'Helm'),namedPart(chest,'Chest'),namedPart(leg,'Leg'),namedPart(boots,'Boots')];
 let makeSet = (name: string,helm: string,chest: string,leg: string,boots: string,special: string) => ({name:name,parts:partedSet(helm,chest,leg,boots),special:special})
+let makeHeadlessSet = (name: string,special: string):ArmorSet => ({name:name,parts:['Chest','Leg','Boots'],special:special});
 let makeStdSet = (name: string,special: string) => ({name:name,parts:allParts,special:special});
 let armorSets : ArmorSet[] = [
   {name:'Revenant',parts:['Chest','Leg','Boots'],special:'Zombie Set'},
@@ -29,19 +30,21 @@ let armorSets : ArmorSet[] = [
   'Strong Dragon',
   'Wise Dragon',
   'Protector Dragon',
+  'Ender',
   'Lapis',
   'Snow Suit',
   'Spooky',
-  'Anglers',
-  makeStdSet('Elegant Tuxedo', 'Max health set to 250, Deal 150% more damage'),
-  makeStdSet('Fancy Tuxedo','Max health set to 150, Deal 100% more damage'),
-  makeStdSet('Cheap Tuxedo','Max health set to 75, Deal 50% more damage'),
+  'Angler',
+  makeHeadlessSet('Elegant Tuxedo', 'Max health set to 250, Deal 150% more damage'),
+  makeHeadlessSet('Fancy Tuxedo','Max health set to 150, Deal 100% more damage'),
+  makeHeadlessSet('Cheap Tuxedo','Max health set to 75, Deal 50% more damage'),
   makeSet('Monster Raider', 'Skeleton\'s Helmet','Guardian Chestplate','Creeper Pants','Spider\'s Boots', '-35% dmg taken, + 35% dmg to monsters'),
   makeSet('Monster Hunter','Skeleton\'s Helmet','Guardian Chestplate','Creeper Pants','Spider\'s Boots', '-30% dmg taken, + 30% dmg to monsters'),
   'Hardened Diamond',
   'Bat Person',
   'Diver\'s',
   'Pack',
+  'Miner'
 
 ];
 let getATitle = (x:ArmorSet) => typeof x == 'string' ? x : x.name;
@@ -76,13 +79,9 @@ let ArmorDisplay = (props:ArmorDisplayProps) => {
 
 }
 
-type IStringDict<T> = {
-  [name:string]: (T | undefined)
-}
-
 type ArmorComponentState = {
   folded:string[]
-  checked:IStringDict<ArmorPart[]>
+  checked:Types.IStringDict<ArmorPart[]>
 }
 
 type ArmorComponentProps = {
@@ -107,13 +106,15 @@ const render = (store:Types.Action1<ArmorComponentState>): ComRenderer <ArmorCom
     update(next);
   }
 
-  return (<div>Armor
+  return (<div><button className="button" onClick={() => update(copyUpdate(state,'folded',armorSets.map(a => getATitle(a))))}>Fold All</button>
+    <ul className='list'>
       {armorSets.map(a => <ArmorDisplay key={getATitle(a)} armor={a} checkedParts={state.checked[getATitle(a)] || []}
         folded={state.folded.includes(getATitle(a))}
         onToggle={() => onToggle(a)}
         onChange={onChange}
         
         />)}
+        </ul>
   </div>)
 };
 

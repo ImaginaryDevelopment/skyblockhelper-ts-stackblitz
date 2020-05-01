@@ -76,12 +76,12 @@ export type TabTextLinkProps<T extends string> = {
 export let TabTextLink = <T extends string>(props:TabTextLinkProps<T>) => (
     <TabLink name={props.name} active={props.active} onClick={props.onClick}>{props.name}</TabLink>);
 
-export type TabContainerProps  = {
+export type TabContainerProps<T extends string>  = {
   addedClasses?: string
   children?:React.ReactNode
-  stdTabs?:{names:string[],onClick:Types.Action1<string>,active:string}
+  stdTabs?:{names:T[],onClick:Types.Action1<T>,active:T}
 }
-export let TabContainer = (props:TabContainerProps) => (
+export let TabContainer = <T extends string>(props:TabContainerProps<T>) => (
   <div className={'tabs is-centered is-boxed ' + (props.addedClasses || '')}>
     <ul>
       {
@@ -111,9 +111,7 @@ type TextLI = {
 export let TextLI = (props:Types.NameValue) => (
   <li key={props.value} className='li ' data-name={props.value}>{props.value}</li>
 )
-type TableProps = {
-  headers:string[]
-}
+
 export let Table = (props:{headers:string[], children:React.ReactNode}) => (
   <table className="table">
             <thead>

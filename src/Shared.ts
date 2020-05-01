@@ -1,5 +1,6 @@
 /* @strict */
 import * as Types from './Types'
+import { Rarity } from './Types';
 
 declare global {
     interface Array<T> {
@@ -95,11 +96,11 @@ export let getTargetValue = <T extends string,TOut>(title:string,f:PureDelegate<
   }
 };
 
-export let toggleArrayValue = <T,>(source:T[],target:T) : T[] =>{
+export let toggleArrayValue = <T,>(source:Readonly<T[]>,target:T) : T[] =>{
   let included = [target, ...source];
   console.log('toggleArrayValue', source,target,included);
 
-  return source.includes(target) ? source.filter(x => x != target) : included;
+  return (source as T[]).includes(target) ? source.filter(x => x != target) : included;
 };
 
 export let distinct = <T>(items:T[], by?:Types.Func1<T,any>) : any[]  => {
@@ -193,3 +194,7 @@ export let createStorageAccess = (source:any) => <T>(key:string) : StorageAccess
     }
   }
 });
+
+export const Rarities = ({
+  all: ['Legendary','Epic','Rare','Uncommon','Common'] as (Readonly<Rarity[]>)
+})
