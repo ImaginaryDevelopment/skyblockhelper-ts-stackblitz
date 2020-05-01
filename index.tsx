@@ -17,7 +17,7 @@ import {BrewingState,initBrewingState,BrewingComponent} from './Brewing'
 import {EnchantsMenuState,enchantsMenuInit,EnchantsMenu} from './Enchants';
 import {EventCalc} from './Events';
 import {MinionTab, MinionTabState, initMinionTabState} from './Minions';
-import {CollectionTracker} from './Collections';
+import {CollectionComponent} from './Collections';
 
 
 // type Components = 'Bazaar' | 'Enchants' | 'Minions' | 'Events' | 'Potions'
@@ -109,7 +109,7 @@ const App : React.FC = () => {
           return (<EventCalc theme={state.theme} state={state.components.eventState} onStateChange={handleUpdate} />)
         })();
         case 'Collections': return (() =>{
-          return (<CollectionTracker getStorage={key=> getStorage('Collections' + '.' + key)} />);
+          return (<CollectionComponent getStorage={key=> getStorage('Collections' + '.' + key)} />);
         })();
       }
     }

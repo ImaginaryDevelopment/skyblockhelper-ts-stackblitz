@@ -13,3 +13,8 @@ export type EventHandler = (nv:NameValue) => void;
 
 export type ComponentEventHandler<TComponentState> = (next:TComponentState) => void;
 
+export type IStringDict<T> = {
+  [name:string]: (T | undefined)
+}
+
+export type Rarity = 'Common' |'Uncommon'|'Rare'|'Epic'|'Legendary';
