@@ -97,6 +97,15 @@ let DisplayWeapon = (props:{item:Weapon, checked:string[],onChange: Types.Action
                     onChange={() => props.onChange(props.item.name)} />
             {props.item.name}
             </div>
+            <div className="column" title='collection'>
+              {props.item.collection}
+            </div>
+            <div className="column" title='Slayer'>
+              {props.item.slayer}
+            </div>
+            <div className="column" title='Upgrades'>
+              {props.item.upgradesTo != null ? 'upgrades to ' + props.item.upgradesTo : ''}
+            </div>
             </div>
             </li>
 );

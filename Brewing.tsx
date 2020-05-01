@@ -20,11 +20,11 @@ type BrewBasesProps ={
   onTPotStateChange: <TKey extends keyof TargetPotion>(k:TKey) => TargetPotionUpdate<TKey>;
 }
 let BrewBases = (props:BrewBasesProps) => (
-  <select onChange={getTargetValue('BrewBases',props.onTPotStateChange('tbase'))}>
+  <select value={props.tpot != null ? props.tpot.tbase : ''} onChange={getTargetValue('BrewBases',props.onTPotStateChange('tbase'))}>
     <option value=''>Bases...</option>
     {
       getBases(props.tpot.name).map(b => (
-        <option key={b} selected={props.tpot.tbase==b} value={b}>{b}</option>
+        <option key={b} value={b}>{b}</option>
       ))
     }
   </select>
@@ -41,7 +41,7 @@ type TargetPotion = {
   // level mod
   lmod?:string
   // is splash
-  splash?:boolean
+  splash?:string
 }
 
 export type BrewingState = {
@@ -97,7 +97,7 @@ let TargetSelector = (props:{tpot:TargetPotion,showDebuffs:boolean, onTPotStateC
             <select className='select' value={props.tpot != null ? props.tpot.name : ''}  
                     onChange={getTargetValue('Brew.name',props.onTPotStateChange('name'))}>
               <option value=''>Potions...</option>
-              {          
+              {
                   ((props.showDebuffs == true ? sorted : sorted.filter(x => x.isDebuff != true)).map(pot => (
                     <option key={pot.name} value={pot.name}>{pot.name}</option>
               )))}
@@ -107,7 +107,7 @@ let TargetSelector = (props:{tpot:TargetPotion,showDebuffs:boolean, onTPotStateC
           return (<div>{JSON.stringify(e,null,4)}</div>);
       }
     })());
-
+// if we are changing to or from 'Enchanted Redstone Lamp' then the values must agree
 let Brew = (props:BrewProps) => (
   <div>
   <h1 className='is-large'>Target</h1>
@@ -115,6 +115,24 @@ let Brew = (props:BrewProps) => (
       <h2 className='h2'>Base - <a className='a' href='https://hypixel-skyblock.fandom.com/wiki/Brews'>wiki</a> - <a href="http://www.minecraft101.net/t/potion-brewer.html">automation</a></h2>
         {(props.tpot != null && props.tpot.name != '' ? <BrewBases tpot={props.tpot} onTPotStateChange={props.onTPotStateChange} /> : <AllBases />)
         }
+        <select value={props.tpot != null ? props.tpot.lmod : ''} onChange={getTargetValue('Brew.lmod', value => (props.onTPotStateChange('lmod')(value)))}>
+          <option value=''>Level Mods...</option>
+          {
+            modifiers.filter(m => m.mod =='Level').map(m => <option key={m.mat} value={m.mat}>{m.mat}</option>)
+          }
+        </select>
+        <select value={props.tpot != null ? props.tpot.dmod : ''} onChange={getTargetValue('Brew.dmod', value => (props.onTPotStateChange('dmod')(value)))}>
+          <option value=''>Duration Mods...</option>
+          {
+            modifiers.filter(m => m.mod == 'Duration').map(m => <option key={m.mat} value={m.mat}>{m.mat}</option>)
+          }
+        </select>
+        <select value={props.tpot != null ? props.tpot.splash: ''} onChange={getTargetValue('Brew.splash', value => (props.onTPotStateChange('splash')(value)))}>
+          <option value=''>Duration Mods...</option>
+          {
+            modifiers.filter(m => m.mod == 'Splash').map(m => <option key={m.mat} value={m.mat}>{m.mat}</option>)
+          }
+        </select>
   </div>
 );
 
@@ -137,10 +155,19 @@ let Modifications = (props:{}) => (
     </div>
 );
 
+const specialMod = 'Enchanted Redstone Lamp';
+let getModChangeResult = (key:'lmod'|'dmod', tpot: TargetPotion, value:string):TargetPotion => {
+  console.info('getModChangeResult');
+  if(value== specialMod) return Object.assign({}, tpot, {lmod:specialMod, dmod:specialMod});
+  if(value != specialMod && ((key == 'lmod' && tpot.dmod == specialMod) || (key=='dmod' && tpot.lmod == specialMod))) return Object.assign({},tpot,{lmod:value,dmod:undefined});
+  return copyUpdate(tpot,key,value);
+}
+
 export let BrewingComponent = (props:BrewingProps) => {
   let stdTabs = {names:['Brew','Reference','Modifications'],active:props.state.subtab,onClick:(x:BrewingState['subtab']) => props.onStateChange(copyUpdate(props.state,'subtab',x))};
 
-  let copyUpdateTPot = <TKey extends keyof TargetPotion>(key:TKey) => (value:TargetPotion[TKey]) => props.onStateChange(copyUpdate(props.state,'tpot',copyUpdate(props.state.tpot,key,value)));
+  let copyUpdateTPot = <TKey extends keyof TargetPotion>(key:TKey) => (value:TargetPotion[TKey]) =>
+    props.onStateChange(copyUpdate(props.state,'tpot', (key == 'lmod' || key == 'dmod') ? getModChangeResult(key as any,props.state.tpot || {}, value as any) : copyUpdate(props.state.tpot || {},key,value)));
 
   let tab = props.state.subtab == 'Brew'? <Brew showDebuffs={props.state.showDebuffs} tpot={props.state.tpot} onTPotStateChange={copyUpdateTPot} /> : 
       props.state.subtab == 'Reference' ? <Reference /> :

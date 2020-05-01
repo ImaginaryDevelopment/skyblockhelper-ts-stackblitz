@@ -44,9 +44,6 @@ let cEnchant = (name:EnchantBase['name'],targetLvl:Enchant['targetLvl'], minEnch
   }
 )
 
-let enchant = (name:EnchantBase['name'],targetLvl:EnchantBase['targetLvl'], adds:{vendorTitle?:EnchantBase['vendorTitle'],isRecommended?:EnchantBase['isRecommended']} | undefined = {}) : EnchantBase =>(
-  {name,targetLvl,vendorTitle:adds.vendorTitle,isRecommended:adds.isRecommended});
-  
 let senchants : Enchant[][] = [
   [
     cEnchant('Critical','V',44,'Diamond 5', 'IV', '8 Enchanted Diamond',{vendorTitle:'VI - Sven Packmaster - Wolf Slayer IV required',isRecommended:true}),
@@ -234,7 +231,8 @@ export type StateHandler = Types.ComponentEventHandler<EnchantsMenuState>;
 
 type EnchantsMenuProps = {
   state:EnchantsMenuState,
-  onStateChange:StateHandler
+  onStateChange:StateHandler,
+  theme:string
 };
 
 export let EnchantsMenu = (props:EnchantsMenuProps) =>{
@@ -266,7 +264,7 @@ export let EnchantsMenu = (props:EnchantsMenuProps) =>{
           )}
         </ul>
       </TabContainer>
-      <div>
+      <div className={props.theme}>
       {
         props.state.submenu=='Sword'?
           <SwordEnchants colorRecommendations={props.state.colorRecommendations} struck={struck} onEnchantClick={onEnchantClick} toggleColors={() => props.onStateChange(setState('colorRecommendations')(props.state.colorRecommendations === false))} onEnchantClear={onEnchantClear} /> :

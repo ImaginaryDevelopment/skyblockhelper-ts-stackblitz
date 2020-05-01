@@ -166,5 +166,5 @@ export let modifiers:PotModifier[] = [
   {mod:'Splash', mat:'Enchanted Gunpowder', value:'splash'}
 ]
 
-export let getBases = (selected:string) => 
+export let getBases = (selected:string) : string[] => 
   selected != '' ? potions.find(p => p.name == selected).bases : distinct(potions.map(p => p.bases).flat());
