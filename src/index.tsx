@@ -89,6 +89,7 @@ const App : React.FC = () => {
           return (() => {
           const handleUpdate = handleComponentUpdate('enchantsState');
           return (<EnchantsMenu 
+            theme={state.theme == 'callout'? 'bd-callout': ''}
             state={state.components.enchantsState}
             onStateChange={handleUpdate}
             />); 
