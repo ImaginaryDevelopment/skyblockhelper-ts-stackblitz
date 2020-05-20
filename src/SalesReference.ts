@@ -192,7 +192,7 @@ export let preconfigurations : Preconfiguration[] = [
     category:'Farming',
     forms:[
       {label:'Rabbit Hide',div:1},
-      {label:'Enchanted Rabbit Hide',div:160},
+      {label:'Enchanted Rabbit Hide',div:64*9},
     ]
   },
   makeDual('Nether Wart','Farming'),
